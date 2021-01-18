@@ -72,7 +72,9 @@ function answer(event) {
 }
 
 function scoreBoard() {
-
+    document.getElementById('begin').style.display = 'none'
+    document.getElementById('question-card').style.display = 'none'
+    document.getElementById('scoreboard').style.display = 'block'
 }
 
 function shuffle(array) {
