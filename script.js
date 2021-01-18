@@ -96,9 +96,7 @@ function nextQuestion() {
         document.getElementById('question').innerHTML = question.question
         question.options = shuffle(question.options)
 
-        for (let i in document.querySelectorAll('.option')) {
-            document.querySelectorAll('#options button')[i].innerHTML = question.options[i]
-        }
+        document.querySelectorAll('.option').forEach(option => option.innerHTML = question.options[i])
     } else {
         scoreBoard()
     }
@@ -131,8 +129,12 @@ function quizEnd() {
     document.getElementById('score-display').innerHTML = `Your score is ${score}.`
     let timeTaken = totalTimeSec - parseInt(document.getElementById('timer'))
     document.getElementById('time-display').innerHTML = `You took ${timeTaken} seconds to complete the quiz.`
-
-    
+    if (localStorage.getItem('scoreboard')) {
+        let scoreboard = JSON.parse('scoreboard')
+        document.getElementById('ranking-display').innerHTML = `Your position in the leaderboard is ${scoreboard.getPosition(score, timeTaken)}`
+    } else {
+        document.getElementById('ranking-display').innerHTML = 'There is no score data available to compare your results to as of yet.'
+    }
 }
 
 function scoreBoard() {
