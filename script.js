@@ -14,10 +14,28 @@ let questions = [
 const totalTimeSec = 60
 let score = 0
 let timer
+let scoreboardProto = {
+    users: [{
+        name: '',
+        games: [{
+            date: Date,
+            score: 0,
+            time: 0,
+            get netScore() {
+                return score - time
+            }
+        }]
+    }],
+    entriesCache: null,
+    get entries(entriesPerPage, page) {
+        
+    }
+}
 
 function quiz() {
     questions = shuffle(questions)
     document.getElementById('begin').style.display = 'none'
+    document.getElementById('scoreboard').style.display = 'none'
     document.getElementById('question-card').style.display = 'block'
     document.querySelectorAll('.option').forEach(elem => elem.addEventListener('click', answer))
 
@@ -75,6 +93,14 @@ function scoreBoard() {
     document.getElementById('begin').style.display = 'none'
     document.getElementById('question-card').style.display = 'none'
     document.getElementById('scoreboard').style.display = 'block'
+
+    // Populate scoreboard
+    if (localStorage.getItem('scoreboard')) {
+        let scoreboard = JSON.parse(localStorage.getItem('scoreboard'))
+        
+    } else {
+        document.getElementById('scoreboard-board').innerHTML = 'No scoreboard entries exist. <a href="#" onclick="quiz()"> Begin quiz.</a>'
+    }
 }
 
 function shuffle(array) {
