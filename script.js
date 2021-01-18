@@ -45,7 +45,7 @@ let scoreboardProto = {
                         sorted = false
                         let temp = allGames[i]
                         allGames[i] = allGames[i + 1]
-                        allGames[i + 1] = temp   
+                        allGames[i + 1] = temp
                     }
                 }
             }
@@ -53,7 +53,9 @@ let scoreboardProto = {
         }
         
         page = page - 1
+
         let i = Math.max(page * entriesPerPage, this.entriesCache.length)
+
         if (i => this.entriesCache.length) {
             return false
         }
@@ -66,6 +68,7 @@ function quiz() {
     questions = shuffle(questions)
     document.getElementById('begin').style.display = 'none'
     document.getElementById('scoreboard').style.display = 'none'
+    document.getElementById('quiz-end').style.display = 'none'
     document.getElementById('question-card').style.display = 'block'
     document.querySelectorAll('.option').forEach(elem => elem.addEventListener('click', answer))
 
@@ -77,11 +80,11 @@ function quiz() {
         let timerEl = document.getElementById('timer')
         let timeRemaining = parseInt(timerEl.innerHTML)
 
-        if (!(timeRemaining < 0)) {
+        if (timeRemaining > 0) {
             timerEl.innerHTML = timeRemaining - 1
         } else {
             clearInterval(timer)
-            finishQuiz()
+            quizEnd()
         }
     }, 1000)
 }
@@ -119,9 +122,23 @@ function answer(event) {
     nextQuestion()
 }
 
+function quizEnd() {
+    document.getElementById('begin').style.display = 'none'
+    document.getElementById('question-card').style.display = 'none'
+    document.getElementById('scoreboard').style.display = 'none'
+    document.getElementById('quiz-end').style.display = 'block'
+
+    document.getElementById('score-display').innerHTML = `Your score is ${score}.`
+    let timeTaken = totalTimeSec - parseInt(document.getElementById('timer'))
+    document.getElementById('time-display').innerHTML = `You took ${timeTaken} seconds to complete the quiz.`
+
+    
+}
+
 function scoreBoard() {
     document.getElementById('begin').style.display = 'none'
     document.getElementById('question-card').style.display = 'none'
+    document.getElementById('quiz-end').style.display = 'none'
     document.getElementById('scoreboard').style.display = 'block'
 
     // Populate scoreboard
