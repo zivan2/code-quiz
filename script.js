@@ -28,7 +28,23 @@ let scoreboardProto = {
     }],
     entriesCache: null,
     get entries(entriesPerPage, page) {
-        
+        if (!entriesCache) {
+            // sort all games
+
+            let allGames = []
+            for (let i in users) for (let j in users[i].games) {
+                allGames.push(users[i].games[j]) // score good time bad
+            }
+
+            let pos = 0;
+            let smallest = 0;
+
+            for (let i in allGames) {
+                if (allGames[i].netScore < allGames[i + 1].netScore && allGames[i + 1]) {
+                    
+                }       
+            }
+        }
     }
 }
 
