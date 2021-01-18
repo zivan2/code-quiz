@@ -36,13 +36,20 @@ let scoreboardProto = {
                 allGames.push(users[i].games[j]) // score good time bad
             }
 
-            let pos = 0;
-            let smallest = 0;
+            let pos = 0
+            let sorted = false
 
-            for (let i in allGames) {
-                if (allGames[i].netScore < allGames[i + 1].netScore && allGames[i + 1]) {
-                    
-                }       
+            // what
+            while (!sorted) {
+                sorted = true
+                for (let i in allGames) {
+                    if (allGames[i].netScore < allGames[i + 1].netScore && allGames[i + 1]) {
+                        sorted = false
+                        let temp = allGames[i]
+                        allGames[i] = allGames[i + 1]
+                        allGames[i + 1] = temp   
+                    }
+                }
             }
         }
     }
