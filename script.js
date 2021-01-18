@@ -22,13 +22,13 @@ let scoreboardProto = {
             score: 0,
             time: 0,
             get netScore() {
-                return score - time
+                return this.score - this.time
             }
         }]
     }],
     entriesCache: null,
-    get entries(entriesPerPage, page) {
-        if (!entriesCache) {
+    getEntries: function(page, entriesPerPage=10) {
+        if (!this.entriesCache) {
             // sort all games
 
             let allGames = []
@@ -36,9 +36,7 @@ let scoreboardProto = {
                 allGames.push(users[i].games[j]) // score good time bad
             }
 
-            let pos = 0
             let sorted = false
-
             // what
             while (!sorted) {
                 sorted = true
@@ -51,7 +49,16 @@ let scoreboardProto = {
                     }
                 }
             }
+            this.entriesCache = allGames
         }
+        
+        page = page - 1
+        let i = Math.max(page * entriesPerPage, this.entriesCache.length)
+        if (i => this.entriesCache.length) {
+            return false
+        }
+
+        return this.entriesCache.slice(i, Math.max((page + 1) * entriesPerPage, this.entriesCache.length))
     }
 }
 
