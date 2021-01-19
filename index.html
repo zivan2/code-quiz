@@ -44,12 +44,13 @@
             <button class="button option d-block" id="4"></button>
         </div>
         <div class="answer" id="answers"></div>
+        <p class='mt-3'>Time Left:</p>
         <div class="timer mx-1" style='display: inline-block;' id="timer"></div>
         <div class="text-success mx-1 hide" id='correct'>Correct!</div>
         <div class="text-danger mx-1 hide" id='incorrect'>Incorrect. -Z seconds.</div>
     </main>
     <div id="quiz-end" class=' p-1'>
-        <h2>You've completed the quiz.</h2>
+        <h2>You've completed the quiz</h2>
         <p id="score-display"></p>
         <p id='time-display'></p>
         <p id='ranking-display'></p>
@@ -57,15 +58,17 @@
         <div class="container m-0 p-0">
             <div id="leaderboard-form" class='col-lg-3 col-md-4 col-sm-6 col-8 m-0 p-0'>
                 <div class="input-group mb-2">
-                    <input type="text" class="form-control" placeholder="First Name">
+                    <input type="text" class="form-control" placeholder="Your Name" maxlength="50" id='name-input'>
                 </div>
-                <div class="input-group mb-2">
-                    <input type="text" class="form-control" placeholder="Last Name (optional)">   
-                </div>         
             </div>
             <div class="col"></div>
         </div>
-        <button class='d-block mb-3'>Save Results</button>
+        <button class='d-block mb-3' onclick='formSubmit()'>Save Results</button>
+        <div id="user-exists" style='display: none' class='my-1' data-namein>
+            <p id="user-exists-prompt"></p>
+            <button onclick='formSubmit(userIsNew="yes")'>Confirm</button>
+            <button onclick='formSubmit(useIsNew="no")'>No</button>
+        </div>
         <a href="#" onclick='scoreBoard()'>I don't want to save my results, take me to the scoreboard.</a>
     </div>
     <div class="card p-1" id="scoreboard" style='display: none;'>

@@ -14,55 +14,6 @@ let questions = [
 const totalTimeSec = 60
 let score = 0
 let timer
-let scoreboardProto = {
-    users: [{
-        name: '',
-        games: [{
-            date: Date,
-            score: 0,
-            time: 0,
-            get netScore() {
-                return this.score - this.time
-            }
-        }]
-    }],
-    entriesCache: null,
-    getEntries: function(page, entriesPerPage=10) {
-        if (!this.entriesCache) {
-            // sort all games
-
-            let allGames = []
-            for (let i in users) for (let j in users[i].games) {
-                allGames.push(users[i].games[j]) // score good time bad
-            }
-
-            let sorted = false
-            // what
-            while (!sorted) {
-                sorted = true
-                for (let i in allGames) {
-                    if (allGames[i].netScore < allGames[i + 1].netScore && allGames[i + 1]) {
-                        sorted = false
-                        let temp = allGames[i]
-                        allGames[i] = allGames[i + 1]
-                        allGames[i + 1] = temp
-                    }
-                }
-            }
-            this.entriesCache = allGames
-        }
-        
-        page = page - 1
-
-        let i = Math.max(page * entriesPerPage, this.entriesCache.length)
-
-        if (i => this.entriesCache.length) {
-            return false
-        }
-
-        return this.entriesCache.slice(i, Math.max((page + 1) * entriesPerPage, this.entriesCache.length))
-    }
-}
 
 function quiz() {
     questions = shuffle(questions)
@@ -96,7 +47,7 @@ function nextQuestion() {
         document.getElementById('question').innerHTML = question.question
         question.options = shuffle(question.options)
 
-        document.querySelectorAll('.option').forEach(option => option.innerHTML = question.options[i])
+        document.querySelectorAll('.option').forEach(option => option.innerHTML = question.options.pop())
     } else {
         scoreBoard()
     }
@@ -134,6 +85,82 @@ function quizEnd() {
         document.getElementById('ranking-display').innerHTML = `Your position in the leaderboard is ${scoreboard.getPosition(score, timeTaken)}`
     } else {
         document.getElementById('ranking-display').innerHTML = 'There is no score data available to compare your results to as of yet.'
+    }
+}
+
+function formSubmit(userNotNew=null) {
+    if (!userNotNew) {
+        if (localStorage.getItem('scoreboard')) {
+            let scoreboard = JSON.parse(localStorage.getItem('scoreboard'))
+            let nameIn = document.getElementById('name-input').value
+            if (scoreboard.userExists(nameIn)) {
+                document.getElementById('user-exists').setAttribute('data-namein', nameIn)
+                document.getElementById('user-exists').style.display = 'block'
+                document.getElementById('user-exists-prompt').innerHTML = `A user with the name "${nameIn}" already exists. If this is you, click confirm. If not, enter a different name to distinguish yourself.  `
+            } else {
+                let timeTaken = totalTimeSec - parseInt(document.getElementById('timer'))
+                scoreboard.addUser(nameIn, score, timeTaken)
+                localStorage('scoreboard', JSON.stringify(scoreboard))
+            }
+        } else {
+            localStorage.setItem('scoreboard', JSON.stringify({
+                users: [{
+                    name: '',
+                    games: [{
+                        date: 1,
+                        score: 0,
+                        time: 0,
+                        netScore: 0
+                    }]
+                }],
+                entriesCache: null,
+                userExists: function(name) {},
+                addUser: function(name, score, time) {},
+                addGameToUser: function(name, score, time) {},
+                getPosition: function(score, time) {},
+                getEntries: function(page, entriesPerPage=10) {
+                    if (!this.entriesCache) {
+                        // sort all games
+            
+                        let allGames = []
+                        for (let i in users) for (let j in users[i].games) {
+                            allGames.push(users[i].games[j]) // score good time bad
+                        }
+            
+                        let sorted = false
+                        // what
+                        while (!sorted) {
+                            sorted = true
+                            for (let i in allGames) {
+                                if (allGames[i].netScore < allGames[i + 1].netScore && allGames[i + 1]) {
+                                    sorted = false
+                                    let temp = allGames[i]
+                                    allGames[i] = allGames[i + 1]
+                                    allGames[i + 1] = temp
+                                }
+                            }
+                        }
+                        this.entriesCache = allGames
+                    }
+                    
+                    page = page - 1
+            
+                    let i = Math.max(page * entriesPerPage, this.entriesCache.length)
+            
+                    if (i => this.entriesCache.length) {
+                        return false
+                    }
+            
+                    return this.entriesCache.slice(i, Math.max((page + 1) * entriesPerPage, this.entriesCache.length))
+                }
+            }))
+        }
+    } else if (userNotNew == 'yes') {
+        let scoreboard = localStorage.getItem('scoreboard')
+        let timeTaken = totalTimeSec - parseInt(document.getElementById('timer'))
+        scoreboard.addGameToUser(document.getElementById('user-exists').getAttribute('data-namein'), score, timeTaken)
+    } else if (userNotNew == 'no') {
+        let scoreboard = localStorage.getItem('scoreboard')
     }
 }
 
