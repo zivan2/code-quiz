@@ -27,10 +27,11 @@
     </style>
 </head>
 <body>
+    <p class="hide">DANGER</p>
     <div class="card p-1" id="begin" style='display: block;'>
         <h1>Code Quiz</h1>
         <p class="subtitle">
-            You will X to complete all of the questions. There are Y questions. Answering a question wrong takes away Z seconds from your time, so answer wisely!
+            You will have X to complete all of the questions. There are Y questions. Answering a question wrong takes away Z seconds from your time, so answer wisely!
         </p>
         <button class="button d-block mb-3" id="button-begin" onclick="quiz()">Begin</button>
         <a href="#" onclick='scoreBoard()'>View Scoreboard</a>
@@ -74,7 +75,7 @@
         <h1>Scoreboard</h1>
         <div id="scoreboard-board">
             <div id="scoreboard-header" class='my-1'>
-                Page: <span id="pages"></span>
+                Page: <u><span id="pages"></span></u>
             </div>
             <table id="scoreboard-table" class='table'>
                 <thead>

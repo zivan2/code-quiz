@@ -1,13 +1,45 @@
+// DON'T CHEAT
+
 let questionsBank = JSON.stringify([
     {
-        question: 'What is a variable?',
-        options: ['a fruit', 'a vegetable', 'an identified piece of data that can be stored, accessed and changed', 'a sphere'],
-        correctOption: 'an identified piece of data that can be stored, accessed and changed'
+        question: 'Inside which HTML element do we put the JavaScript?',
+        options: ['&lt;js&gt;', '&lt;script&gt;', '&lt;javascript&gt;', '&lt;scripting&gt;'],
+        correctOption: '&lt;script&gt;'
     },
     {
-        question: 'What is the big variable?',
-        options: ['Window', 'document', 'html', 'javascript'],
-        correctOption: 'Window'
+        question: 'What is the correct JavaScript syntax to change the content of the HTML element below?<br><br>&lt;p id="demo"&gt;This is a demonstration.&lt;/p&gt;',
+        options: ['#demo.innerHTML = "Hello World!";', 'document.getElement("p").innerHTML = "Hello World!";', 'document.getElementById("demo").innerHTML = "Hello World!";', 'document.getElementByName("p").innerHTML = "Hello World!";'],
+        correctOption: 'document.getElementById("demo").innerHTML = "Hello World!";'
+    },
+    {
+        question: 'Where can we place a JS script in the page?',
+        options: ['Anywhere in the page', 'In the body', 'In the head', 'Outside the body'],
+        correctOption: 'Anywhere in the page'
+    },
+    {
+        question: 'What is the correct syntax for referring to an external script called "script.js" located in the same directory as the page?',
+        options: ['&lt;script name="script.js"&gt;', '&lt;script src="script.js"&gt;', '&lt;script href="script.js"&gt;', '&lt;script script="script.js"&gt;'],
+        correctOption: '&lt;script src="script.js"&gt;'
+    },
+    {
+        question: 'How do you write "Hello World" in an alert box?',
+        options: ['msgBox("Hello World");', 'msg("Hello World");', 'alert("Hello World");', 'alertBox("Hello World");'],
+        correctOption: 'alert("Hello World");'
+    },
+    {
+        question: 'How do you create a function in JavaScript?',
+        options: ['function:myFunction()', 'function = myFunction()', 'function myFunction()', 'function myFunction() {}'],
+        correctOption: 'function myFunction() {}'
+    },
+    {
+        question: 'How do you call a function named "myFunction"?',
+        options: ['myFunction', 'call myFunction', 'myFunction()', 'myFunction() {}'],
+        correctOption: 'myFunction()'
+    },
+    {
+        question: 'How to write an IF statement in JavaScript?',
+        options: ['if condition', 'if (condition)', 'if condition then', 'if (condition) then'],
+        correctOption: 'if (condition)'
     }
 ])
 let questions
@@ -65,15 +97,17 @@ function nextQuestion() {
 
 function answer(event) {
     let question = questions.pop()
-    document.getElementById('incorrect').className = 'text-danger mx-1 hide'
     document.getElementById('correct').className = 'text-success mx-1 hide'
+    document.getElementById('incorrect').className = 'text-danger mx-1 hide'
 
     if (event.target.innerHTML == question.correctOption) {
         score++
-        document.getElementById('correct').className += ' fade'
+        // too fast if instant
+        setTimeout(() => document.getElementById('correct').className = 'text-success mx-1 fade', 10)
     } else {
-        document.getElementById('timer').innerHTML = parseInt(document.getElementById('timer').innerHTML) - 10
-        document.getElementById('incorrect').className += ' fade'
+        document.getElementById('timer').innerHTML = Math.max(parseInt(document.getElementById('timer').innerHTML) - 10, 0)
+        // too fast if instant
+        setTimeout(() => document.getElementById('incorrect').className = 'text-danger mx-1 fade', 10)
     }
     nextQuestion()
 }
@@ -87,7 +121,7 @@ function quizEnd() {
     document.getElementById('scoreboard').style.display = 'none'
     document.getElementById('quiz-end').style.display = 'block'
 
-    dateFinished = Date.now()
+    dateFinished = Date(Date.now())
 
     document.getElementById('score-display').innerHTML = `Your score is ${score}.`
     let timeRemaining = parseInt(document.getElementById('timer').innerHTML)
@@ -168,8 +202,9 @@ function scoreBoard(page=1, entriesPerPage=10) {
         let scoreboard = JSON.parse(localStorage.getItem('scoreboard'))
 
         // page links
-        for (let i = 0; i < Math.floor(scoreboard.entriesCache.length / entriesPerPage); i++) {
-            document.getElementById('pages').innerHTML += `<a href="#" onclick="scoreBoard(page=${i+1})>${i+1}</a>">`
+        document.getElementById('pages').innerHTML = ''
+        for (let i = 0; i < Math.ceil(scoreboard.entriesCache.length / entriesPerPage); i++) {
+            document.getElementById('pages').innerHTML += `<a href="#" class="mx-1" onclick="scoreBoard(page=${i+1})">${i+1}</a>`
         }
 
         let entries = getEntries(scoreboard, page, entriesPerPage)
@@ -178,7 +213,7 @@ function scoreBoard(page=1, entriesPerPage=10) {
             tbody.innerHTML = ''
             for (let i in entries) {
                 tbody.innerHTML = tbody.innerHTML + 
-                    `<tr><th scope="row">${entries[i].position}</th><td>${entries[i].userName}</td><td>${entries[i].score}</td><td>${totalTimeSec - entries[i].time}</td><td>${Date(entries[i].date)}</td></tr>`
+                    `<tr><th scope="row">${entries[i].position}</th><td>${entries[i].userName}</td><td>${entries[i].score}</td><td>${totalTimeSec - entries[i].time}</td><td>${(entries[i].date)}</td></tr>`
             }
         }
     } else {
@@ -215,6 +250,8 @@ function addUser(sb, name, score, time, dateFinished) {
                 sb.entriesCache = before.concat(game).concat(after) // sandwich new game in the middle
                 return
             }
+            sb.entriesCache.push(game)
+            return
         }
     } else {
         sb.users.push({
@@ -250,12 +287,14 @@ function addGameToUser(sb, name, score, time, dateFinished) {
             sb.entriesCache = before.concat(game).concat(after) // sandwich new game in the middle
             return
         }
+        sb.entriesCache.push(game)
+        return
     }
 }
 function getPosition(sb, score, time) {
     for (let i in sb.entriesCache) {
         if ((score - time) > sb.entriesCache[i].netScore) {
-            return i + 1
+            return parseInt(parseInt(i) + 1)
         }
     }
 }
