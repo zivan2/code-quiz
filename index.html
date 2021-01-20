@@ -56,9 +56,9 @@
         <p id='ranking-display'></p>
         <p class='d-block'>Save your results:</p>
         <div class="container m-0 p-0">
-            <div id="leaderboard-form" class='col-lg-3 col-md-4 col-sm-6 col-8 m-0 p-0'>
+            <div id="leaderboard-form" class='col-lg-4 col-md-5 col-sm-7 col-9 m-0 p-0'>
                 <div class="input-group mb-2">
-                    <input type="text" class="form-control" placeholder="Your Name" maxlength="50" id='name-input'>
+                    <input type="text" class="form-control" placeholder="Your Name (leave blank for anonymous)" maxlength="50" id='name-input'>
                 </div>
             </div>
             <div class="col"></div>
@@ -66,8 +66,7 @@
         <button class='d-block mb-3' onclick='formSubmit()'>Save Results</button>
         <div id="user-exists" style='display: none' class='my-1' data-namein>
             <p id="user-exists-prompt"></p>
-            <button onclick='formSubmit(userIsNew="yes")'>Confirm</button>
-            <button onclick='formSubmit(useIsNew="no")'>No</button>
+            <button onclick='formSubmit(userNew=false)'>Yes, this is me</button>
         </div>
         <a href="#" onclick='scoreBoard()'>I don't want to save my results, take me to the scoreboard.</a>
     </div>
