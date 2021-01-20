@@ -1,4 +1,4 @@
-let questions = [
+let questionsBank = JSON.stringify([
     {
         question: 'What is a variable?',
         options: ['a fruit', 'a vegetable', 'an identified piece of data that can be stored, accessed and changed', 'a sphere'],
@@ -9,23 +9,27 @@ let questions = [
         options: ['Window', 'document', 'html', 'javascript'],
         correctOption: 'Window'
     }
-]
+])
+let questions
 
 const totalTimeSec = 60
 let score = 0
 let timer
 let dateFinished
 
+document.querySelectorAll('.option').forEach(elem => elem.addEventListener('click', answer))
+
 // begin quiz
 function quiz() {
-    questions = shuffle(questions)
+    questions = shuffle(JSON.parse(questionsBank))
 
     // hide everything except quiz
     document.getElementById('begin').style.display = 'none'
     document.getElementById('scoreboard').style.display = 'none'
     document.getElementById('quiz-end').style.display = 'none'
+    document.getElementById('incorrect').className = 'text-danger mx-1 hide'
+    document.getElementById('correct').className = 'text-success mx-1 hide'
     document.getElementById('question-card').style.display = 'block'
-    document.querySelectorAll('.option').forEach(elem => elem.addEventListener('click', answer))
 
     score = 0
 
@@ -75,6 +79,8 @@ function answer(event) {
 }
 
 function quizEnd() {
+    clearInterval(timer)
+
     // hide everything except quiz end
     document.getElementById('begin').style.display = 'none'
     document.getElementById('question-card').style.display = 'none'
@@ -88,7 +94,7 @@ function quizEnd() {
     document.getElementById('time-display').innerHTML = `You finished with ${timeRemaining} seconds left.`
     if (localStorage.getItem('scoreboard')) {
         let scoreboard = JSON.parse(localStorage.getItem('scoreboard'))
-        document.getElementById('ranking-display').innerHTML = `Your position in the leaderboard is ${getPosition(scoreboard, score, timeTaken)}`
+        document.getElementById('ranking-display').innerHTML = `Your position in the leaderboard is ${getPosition(scoreboard, score, timeRemaining)}`
     } else {
         document.getElementById('ranking-display').innerHTML = 'There is no score data available to compare your results to as of yet.'
     }
@@ -99,15 +105,14 @@ function formSubmit(userNew=true) {
     if (userNew) {
         // get name input
         let nameIn = document.getElementById('name-input').value
-        if (nameIn == '') nameIn = 'Anonymous'
 
         if (localStorage.getItem('scoreboard')) {
             let scoreboard = JSON.parse(localStorage.getItem('scoreboard'))
-            if (userExists(nameIn)) {
+            if (userExists(scoreboard, nameIn)) {
                 // ask user if the existing name is their name
                 document.getElementById('user-exists').setAttribute('data-namein', nameIn) // save namein that matches existing
                 document.getElementById('user-exists').style.display = 'block'
-                document.getElementById('user-exists-prompt').innerHTML = `A user with the name "${nameIn}" already exists. Is this is you? If not, enter a different name to distinguish yourself.`
+                document.getElementById('user-exists-prompt').innerHTML = `A user with the name "${nameIn}" already exists. Is this is you? If not, please enter a different name to distinguish yourself.`
             } else {
                 // add user if they don't already exist
                 if (nameIn == '') nameIn = 'Anonymous'
@@ -119,10 +124,12 @@ function formSubmit(userNew=true) {
         } else {
             // create scoreboard with initial entry
             let timeTaken = totalTimeSec - parseInt(document.getElementById('timer').innerHTML)
+            if (nameIn == '') nameIn = 'Anonymous'
             localStorage.setItem('scoreboard', JSON.stringify({
                 users: [{
                     name: nameIn,
                     games: [{
+                        userName: nameIn,
                         date: dateFinished,
                         score: score,
                         time: timeTaken,
@@ -130,17 +137,19 @@ function formSubmit(userNew=true) {
                     }]
                 }],
                 entriesCache: [{
+                    userName: nameIn,
                     date: dateFinished,
                     score: score,
                     time: timeTaken,
-                    netScore: score - timeTaken
+                    netScore: score - timeTaken,
+                    position: 1
                 }]
             }))
+            scoreBoard()
         }
-        scoreBoard()
     } else {
         // add game to existing user
-        let scoreboard = localStorage.getItem('scoreboard')
+        let scoreboard = JSON.parse(localStorage.getItem('scoreboard'))
         let timeTaken = totalTimeSec - parseInt(document.getElementById('timer').innerHTML)
         addGameToUser(scoreboard, document.getElementById('user-exists').getAttribute('data-namein'), score, timeTaken, dateFinished)
         localStorage.setItem('scoreboard', JSON.stringify(scoreboard))
@@ -148,7 +157,7 @@ function formSubmit(userNew=true) {
     }
 }
 
-function scoreBoard() {
+function scoreBoard(page=1, entriesPerPage=10) {
     document.getElementById('begin').style.display = 'none'
     document.getElementById('question-card').style.display = 'none'
     document.getElementById('quiz-end').style.display = 'none'
@@ -157,7 +166,21 @@ function scoreBoard() {
     // Populate scoreboard
     if (localStorage.getItem('scoreboard')) {
         let scoreboard = JSON.parse(localStorage.getItem('scoreboard'))
-        
+
+        // page links
+        for (let i = 0; i < Math.floor(scoreboard.entriesCache.length / entriesPerPage); i++) {
+            document.getElementById('pages').innerHTML += `<a href="#" onclick="scoreBoard(page=${i+1})>${i+1}</a>">`
+        }
+
+        let entries = getEntries(scoreboard, page, entriesPerPage)
+        if (entries) {
+            let tbody = document.getElementById('scoreboard-table-body')
+            tbody.innerHTML = ''
+            for (let i in entries) {
+                tbody.innerHTML = tbody.innerHTML + 
+                    `<tr><th scope="row">${entries[i].position}</th><td>${entries[i].userName}</td><td>${entries[i].score}</td><td>${totalTimeSec - entries[i].time}</td><td>${Date(entries[i].date)}</td></tr>`
+            }
+        }
     } else {
         document.getElementById('scoreboard-board').innerHTML = 'No scoreboard entries exist. <a href="#" onclick="quiz()"> Begin quiz.</a>'
     }
@@ -172,30 +195,60 @@ function userExists(sb, name) {
     }
 }
 function addUser(sb, name, score, time, dateFinished) {
-    sb.users.push({
-        name: name,
-        games: [{
-            date: dateFinished,
-            score: score,
-            time: timeTaken,
-            netScore: score - timeTaken
-        }]
-    })
+    let game = {
+        userName: name,
+        date: dateFinished,
+        score: score,
+        time: time,
+        netScore: score - time,
+        position: null
+    }
+    if (name == 'Anonymous') {
+        sb.users.push({
+            name: name,
+            games: [game]
+        })
+        for (let i in sb.entriesCache) {
+            if (game.netScore > sb.entriesCache[i].netScore) {
+                let before = sb.entriesCache.slice(0, i) // from beggining to i
+                let after = sb.entriesCache.slice(i, sb.entriesCache.length) // from i to end
+                sb.entriesCache = before.concat(game).concat(after) // sandwich new game in the middle
+                return
+            }
+        }
+    } else {
+        sb.users.push({
+            name: name,
+            games: []
+        })
+        addGameToUser(sb, name, score, time, dateFinished)
+    }
 }
 function addGameToUser(sb, name, score, time, dateFinished) {
     let game = {
+        userName: name,
         date: dateFinished,
         score: score,
-        time: timeTaken,
-        netScore: score - timeTaken
+        time: time,
+        netScore: score - time,
+        position: null
     }
-    sb.users.find(user => user.games.push(game))
 
+    // add game to user
+    for (let i in sb.users) {
+        if (sb.users[i].name == name) {
+            sb.users[i].games.push(game)
+            break
+        }
+    }
+
+    // add game to entries
     for (let i in sb.entriesCache) {
         if (game.netScore > sb.entriesCache[i].netScore) {
-            let before = sb.entriesCache.split(0, i) // from beggining to i
-            let after = sb.entriesCache.split(i, sb.entriesCache.length) // from i to end
-            return before.concat(game).concat(after) // sandwich new game in the middle
+            let before = sb.entriesCache.slice(0, i) // from beggining to i
+            let after = sb.entriesCache.slice(i, sb.entriesCache.length) // from i to end
+            sb.entriesCache = before.concat(game).concat(after) // sandwich new game in the middle
+            return
         }
     }
 }
@@ -206,7 +259,7 @@ function getPosition(sb, score, time) {
         }
     }
 }
-function getEntries(sb, page, entriesPerPage=10) {
+function getEntries(sb, page, entriesPerPage) {
     // if (!sb.entriesCache) {
     //     // sort all games
 
@@ -233,13 +286,18 @@ function getEntries(sb, page, entriesPerPage=10) {
     
     page = page - 1
 
-    let i = Math.max(page * entriesPerPage, sb.entriesCache.length)
+    let i = Math.min(page * entriesPerPage, sb.entriesCache.length)
 
-    if (i => sb.entriesCache.length) {
+    if (i >= sb.entriesCache.length) {
         return false
     }
-
-    return sb.entriesCache.slice(i, Math.max((page + 1) * entriesPerPage, sb.entriesCache.length))
+    setPositionOnEntries(sb)
+    return sb.entriesCache.slice(i, Math.min((page + 1) * entriesPerPage, sb.entriesCache.length))
+}
+function setPositionOnEntries(sb) {
+    for (let i in sb.entriesCache) {
+        sb.entriesCache[i].position = parseInt(parseInt(i) + 1)
+    }
 }
 // ---------------------------------------------
 

@@ -73,13 +73,22 @@
     <div class="card p-1" id="scoreboard" style='display: none;'>
         <h1>Scoreboard</h1>
         <div id="scoreboard-board">
-            <div id="scoreboard-header">
-                Page: 
+            <div id="scoreboard-header" class='my-1'>
+                Page: <span id="pages"></span>
             </div>
-            <div id="scoreboard-entries">
-
-            </div>
-            <a href="#" onclick="quiz()"> Begin quiz.</a>
+            <table id="scoreboard-table" class='table'>
+                <thead>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Score</th>
+                    <th scope="col">Time left</th>
+                    <th scope="col">Completed on</th>
+                </thead>
+                <tbody id='scoreboard-table-body'>
+                    
+                </tbody>
+            </table>
+            <a href="#" onclick="quiz()"> Begin Quiz</a>
         </div>
     </div>
 </body>
